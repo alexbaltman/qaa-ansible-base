@@ -1,0 +1,56 @@
+---
+- name: Stop docker and remove the /var/lib/docker cache path
+  command: /bin/bash -c "service docker stop; rm -rf /var/lib/docker/"
+  become: true
+
+- name: Create a docker.service.d systemd path
+  command: /bin/bash -c "mkdir /etc/systemd/system/docker.service.d;chmod 700 /etc/systemd/system/docker.service.d/"
+  become: true
+
+- name: Create an lvmblock.conf file for systemd docker.service.d
+  command: /bin/bash -c "touch /etc/systemd/system/docker.service.d/lvmblock.conf;chmod 400 /etc/systemd/system/docker.service.d/lvmblock.conf"
+  become: true
+
+- name: Add lvmblock.conf content to file
+  template: src=lvmblock.conf.j2 dest=/etc/systemd/system/docker.service.d/lvmblock.conf mode=0400
+
+- name: Create a docker-thinpool.profile for pv and vg and lv to use
+  command: /bin/bash -c "touch /etc/lvm/profile/docker-thinpool.profile"
+  become: true
+
+- name: Add docker-thinpool.profile content to file
+  template: src=docker-thinpool.profile.j2 dest=/etc/lvm/profile/docker-thinpool.profile mode=0400
+
+# fdisk - too much for this one play to handle
+
+- name: PVCreate /dev/sdb
+  command: /bin/bash -c "echo y | pvcreate /dev/sdb"
+  become: true
+
+- name: VGCreate docker on /dev/sdb
+  command: /bin/bash -c "vgcreate docker /dev/sdb"
+  become: true
+
+- name: LVRemove thinpool
+  command: /bin/bash -c "echo y | lvremove thinpool docker --quiet"
+  become: true
+
+- name: LVCreate thinkpool
+  command: /bin/bash -c "echo y | lvcreate --wipesignatures y -n thinpool docker -l 95%VG  --quiet"
+  become: true
+
+- name: LVCreate thinkpool-meta
+  command: /bin/bash -c "echo y | lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG --quiet"
+  become: true
+
+- name: LVConver thinpool
+  command: /bin/bash -c "lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta"
+  become: true
+
+- name: LVChange thinpool to use profile created earlier
+  command: /bin/bash -c "lvchange --metadataprofile docker-thinpool docker/thinpool"
+  become: true
+
+- name: Reload systemd daemon and start docker and check docker for return
+  command: /bin/bash -c "systemctl daemon-reload;systemctl start docker;docker ps"
+  become: true

@@ -40,3 +40,4 @@
   copy: src={{ item }} dest=/etc/cron.hourly/{{ item }} mode=0755
   with_items:
      - docker-cleanup.sh
+
