@@ -2,11 +2,11 @@
 This repo is used to setup our baremetal servers and VMs in a uniform way prior to using in one of our K8 environments.
 
 Currently it will:
-Fdisk partitions # [checkbox:unchecked]
-LVM for Docker # [checkbox:unchecked]
-Setup Base repos # [checkbox:checked]
-Install base packages # [checkbox:checked]
-Add docker cleanup cron # [checkbox:checked]
+- [ ] Fdisk partitions
+- [ ] LVM for Docker
+- [x] Setup Base repos
+- [x] Install base packages
+- [x] Add docker cleanup cron
 
 ### Pre-Requisites
  1. ansible version 2.x
