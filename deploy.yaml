@@ -7,4 +7,6 @@
   become: yes
   become_method: sudo
   roles:
+    # This is not run yet b/c fdisk partitioning not automated yet --> see roles/lvm/tasks/main.yaml comment
+    # - lvm
     - base
