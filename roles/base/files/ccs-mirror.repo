@@ -1,0 +1,79 @@
+[rhel-ha-for-rhel-7-server-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-ha-for-rhel-7-server-rpms_unstable/
+ui_repoid_vars = releasever basearch
+name = Red Hat Enterprise Linux High Availability (for RHEL 7 Server) (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+
+[rhel-7-server-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-rpms_unstable/
+ui_repoid_vars = releasever basearch
+name = Red Hat Enterprise Linux 7 Server (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+skip_if_unavailable = 1
+keepcache = 0
+
+[rhel-7-server-extras-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-extras-rpms_unstable/
+ui_repoid_vars = basearch
+name = Red Hat Enterprise Linux 7 Server - Extras (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+
+[rhel-7-server-openstack-5.0-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-openstack-5.0-rpms_unstable/
+ui_repoid_vars = releasever basearch
+name = Red Hat OpenStack 5.0 for RHEL 7 (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+
+[rhel-7-server-supplementary-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-supplementary-rpms_unstable/
+ui_repoid_vars = releasever basearch
+name = Red Hat Enterprise Linux 7 Server - Supplementary (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+
+[rhel-7-server-optional-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-optional-rpms_unstable/
+ui_repoid_vars = releasever basearch
+name = Red Hat Enterprise Linux 7 Server - Optional (RPMs)
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+enabled = 1
+gpgcheck = 1
+
+[rhel-7-server-cisco-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-cisco-rpms/
+gpgcheck=0
+ui_repoid_vars = releasever basearch
+name = Supplemental Cisco RPMs for RHEL 7 Server (RPMs)
+enabled = 1
+
+[rhel-7-server-oslo-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-oslo-rpms_unstable/
+gpgcheck=0
+ui_repoid_vars = releasever basearch
+name = Supplemental oslo RPMs for RHEL 7 Server (RPMs)
+enabled = 0
+
+[rhel-7-server-kombu-rpms]
+metadata_expire = 86400
+baseurl = https://ccs-mirror.cisco.com/pulp/repos/rhel-7-server-kombu-rpms_unstable/
+gpgcheck=0
+ui_repoid_vars = releasever basearch
+name = Supplemental kombu RPMs for RHEL 7 Server (RPMs)
+enabled = 0

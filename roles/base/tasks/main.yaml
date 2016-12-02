@@ -1,0 +1,42 @@
+---
+- name: Add RH SSL Cert
+  copy: src=hydsslg2.crt dest=/etc/pki/ca-trust/source/anchors/hydsslg2.crt mode=0755
+
+- name: update-ca-trust
+  shell: update-ca-trust
+
+- name: Add Repo Files to /etc/yum.repos.d
+  copy: src={{ item }} dest=/etc/yum.repos.d/{{ item }} mode=0755
+  with_items:
+     - docker.repo
+     - ccs-mirror.repo
+     - epel.repo
+
+- name: Install Baseline Packages
+  yum: name={{ item }} state=latest
+  with_items:
+     - telnet
+     - traceroute
+     - nmap
+     - wget
+     - git
+     - python-pip
+     - docker-engine
+
+- name: Install Python Packages
+  command: "pip install {{ item }}"
+  with_items:
+     - pip --upgrade
+     - docker-compose --upgrade
+     - requests==2.6.1
+
+- name: Enable Docker
+  service: name=docker enabled=yes
+
+- name: Restart Docker
+  service: name=docker state=restarted
+
+- name: Add to Hourly CRON job; prunes orphan images, containers, and volumes
+  file: src={{ item }} dest=/etc/cron.hourly/{{ item }} mode=700
+  with_items:
+     - docker-cleanup
