@@ -1,47 +1,49 @@
 ---
-# Run play from top level with become: true and become_method: sudo
-# TODO: use lvm module. fdisk section. testing. localdev.
+# Docker devicemapper guide
+# https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/
 
-- name: Stop docker and remove the /var/lib/docker cache path
-  command: "service docker stop; rm -rf /var/lib/docker/"
 
-- name: Create a docker.service.d systemd path
-  command: "mkdir /etc/systemd/system/docker.service.d;chmod 700 /etc/systemd/system/docker.service.d/"
+# Setup
+- stat: path=/etc/systemd/system/docker.service.d/lvmblock.conf
+  register: mybool
 
-- name: Create an lvmblock.conf file for systemd docker.service.d
-  command: "touch /etc/systemd/system/docker.service.d/lvmblock.conf;chmod 400 /etc/systemd/system/docker.service.d/lvmblock.conf"
+#- service: name=docker state=stopped
+#  when: mybool.stat.exists
 
-- name: Add lvmblock.conf content to file
-  copy: src=lvmblock.conf dest=/etc/systemd/system/docker.service.d/lvmblock.conf mode=0400
+- name: Remove the /var/lib/docker cache path
+  file: dest=/var/lib/docker/ state=absent
+  when: mybool.stat.exists
 
-- name: Create a docker-thinpool.profile for pv and vg and lv to use
-  command: "touch /etc/lvm/profile/docker-thinpool.profile"
 
-- name: Add docker-thinpool.profile content to file
-  template: src=docker-thinpool.profile.j2 dest=/etc/lvm/profile/docker-thinpool.profile mode=0400
+# LVM
+- name: Setup sdb as our docker vol group
+  lvg: vg=docker state=present pvs=/dev/sdb
 
-# fdisk - too much for this one play to handle
+- name: Create a logical volume 95% of docker vg on /dev/sdb
+  lvol: vg=docker lv=thinpool size=95%VG opts="--wipesignatures y"
 
-- name: PVCreate /dev/sdb
-  command: "echo y | pvcreate /dev/sdb"
+- name: Create a logical volume 1% of docker vg on/dev/sdb
+  lvol: vg=docker lv=thinpoolmeta size=1%VG opts="--wipesignatures y"
 
-- name: VGCreate docker on /dev/sdb
-  command: "vgcreate docker /dev/sdb"
-
-- name: LVRemove thinpool
-  command: "echo y | lvremove thinpool docker --quiet"
-
-- name: LVCreate thinkpool
-  command: "echo y | lvcreate --wipesignatures y -n thinpool docker -l 95%VG  --quiet"
-
-- name: LVCreate thinkpool-meta
-  command: "echo y | lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG --quiet"
-
-- name: LVConver thinpool
+- name: Convert to thinpool
   command: "lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta"
 
-- name: LVChange thinpool to use profile created earlier
-  command: "lvchange --metadataprofile docker-thinpool docker/thinpool"
+- name: Create docker-thinpool.profile for pv, vs, and lv to use
+  copy: src=docker-thinpool.profile dest=/etc/lvm/profile/docker-thinpool.profile mode=0400
 
+- name: Apply new LVM profile
+  command: lvchange --metadataprofile docker-thinpool docker/thinpool
+
+
+# SystemD
+- name: Create a docker.service.d systemd path
+  file: dest='/etc/systemd/system/docker.service.d' mode=0700 state=directory
+
+- name: Create an lvmblock.conf file for systemd docker.service.d
+  copy: src=lvmblock.conf dest=/etc/systemd/system/docker.service.d/lvmblock.conf mode=0400
+
+
+# Start it up
 - name: Reload systemd daemon and start docker and check docker for return
   command: "systemctl daemon-reload;systemctl start docker;docker ps"
+  when: mybool.stat.exists
